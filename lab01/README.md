@@ -446,9 +446,8 @@ qemu-system-i386 -kernel linux-5.10.19/arch/x86/boot/bzImage -initrd initramfs-b
 > - **x86_64环境**（Ubuntu或麒麟OS）：直接按照以下步骤操作。麒麟OS上若没有`qemu-system-i386`，可使用`qemu-system-x86_64`代替（完全兼容32位）。
 > - **ARM64环境**（Ubuntu ARM64或麒麟OS ARM64）：Linux 0.11是32位x86操作系统，在ARM64上编译需要构建i686交叉编译工具链。完整步骤请参考附录G.1，已在麒麟V11 ARM64上验证通过。
 
-## 下载Linux 0.11内核代码
-
-注意从课程提供的地址（因为文件较大，故传到了微信群）下载，否则linux 0.11内核不能编译，因为早期的linux内核需要低版本的gcc编译器；
+## 获得Linux 0.11内核代码
+在 `lab01/src/`下可以找到源码`Linux-0.11-lab1.tar.gz`
 
 ## 编译32位版本的linux 0.11内核
 
@@ -731,7 +730,7 @@ journalctl -k --no-pager | head -50
 sudo dmesg | head -50
 ```
 
-观察内核启动的关键阶段：
+观察内核启动的关键阶段(当然，也可将`journalctl -k --no-paper`换成`dmesg`)：
 
 ```shell
 # 查看与启动相关的信息
