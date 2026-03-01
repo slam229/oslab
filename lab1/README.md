@@ -447,7 +447,7 @@ qemu-system-i386 -kernel linux-5.10.19/arch/x86/boot/bzImage -initrd initramfs-b
 > - **ARM64环境**（Ubuntu ARM64或麒麟OS ARM64）：Linux 0.11是32位x86操作系统，在ARM64上编译需要构建i686交叉编译工具链。完整步骤请参考附录G.1，已在麒麟V11 ARM64上验证通过。
 
 ## 获得Linux 0.11内核代码
-在 `lab01/src/`下可以找到源码`Linux-0.11-lab1.tar.gz`
+在 `lab1/src/`下可以找到源码`Linux-0.11-lab1.tar.gz`
 
 ## 编译32位版本的linux 0.11内核
 
