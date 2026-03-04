@@ -140,15 +140,18 @@ sudo yum install openssl-devel
 sudo yum install bc
 ```
 
-> 在x86_64架构的麒麟OS上，还需要安装i386（32位）开发库：
+> Ubuntu上有`libc6-dev-i386`来为编译32位程序所必需的库。
+> 但对于x86_64架构的麒麟OS，官方源不提供32位的库，为了解决这个问题，需要手动编译交叉工具链和库:
+> `lab1/`目录下有3个编译构建脚本: `build_binutils.sh`, `build_gcc.sh`, `build_musl.sh`,请依次执行。（构建耗时可能较长，请耐心等待）
 > ```shell
-> sudo yum install glibc-devel.i686 libgcc.i686
+> cd lab1
+> ./build_binutils.sh
+> ./build_gcc.sh
+> ./build_musl.sh
 > ```
 > 在ARM64架构的麒麟OS上，请参阅第二部分开头的“多架构说明”。
 
-> **说明：** Ubuntu上的`libc6-dev-i386`和麒麟OS上的`glibc-devel.i686`作用相同，都是编译32位（i386）程序所必需的库。不同Linux发行版的包名有所不同，这体现了Debian（deb）和Red Hat（rpm）两大包管理体系的差异。
-
-安装vscode以及在vscode中安装汇编、 C/C++插件。vscode将作为一个有力的代码编辑器。
+最后，建议安装vscode以及在vscode中安装汇编、 C/C++插件。vscode将作为一个有力的代码编辑器。
 
 # 第二部分：编译Linux内核
 
@@ -280,9 +283,8 @@ c
 在继续执行后，最终qemu的输出如下，在qemu虚拟机里运行的Linux系统能成功启动，并且最终以Kernel panic宣告结束。看到call trace打出来的是在initrd_load的时候出错，原因很简单，因为启动系统的时候只指定了bzImage，没有指定initrd文件，系统无法mount上initrd (init ram disk) 及其initramfs文件系统。
 
 > **思考题：**
-> 1. `start_kernel`函数位于哪个源文件中？请用GDB的`list`命令查看。
+> 1. `start_kernel`函数位于哪个源文件中？提示：用`info`或`list`。
 > 2. 使用`info registers`查看寄存器状态。在i386模式下，你能看到哪些寄存器（EAX、EBX、ESP等）？
-> 3. 尝试在`start_kernel`中单步执行几步（`n`），观察内核初始化的前几个函数调用。
 
 # 第四部分：制作Initramfs  
 
@@ -437,6 +439,9 @@ qemu-system-i386 -kernel linux-5.10.19/arch/x86/boot/bzImage -initrd initramfs-b
 > ```
 
 退出QEMU：按`Ctrl+A`然后按`X`。
+
+**思考题：**
+> 1. 尝试在`start_kernel`中单步执行几步（`n`），观察内核初始化的前几个函数调用。
 
 # 第六部分：完成Linux 0.11内核的编译、启动和调试
 
