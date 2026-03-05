@@ -149,7 +149,7 @@ sudo yum install bc
 > ./build_gcc.sh
 > ./build_musl.sh
 > ```
-> 在ARM64架构的麒麟OS上，请参阅第二部分开头的“多架构说明”。
+>运行完成后，在`lab1/cross_tools/install/bin/`下可以看到`i686-linux-musl-gcc`，后续请使用它作为编译器。
 
 最后，建议安装vscode以及在vscode中安装汇编、 C/C++插件。vscode将作为一个有力的代码编辑器。
 

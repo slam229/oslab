@@ -9,8 +9,9 @@ PREFIX="$CROSS_DIR/install"
 mkdir -p "$CROSS_DIR"
 cd "$CROSS_DIR"
 
+log_info() { echo -e "\033[1;33m[INFO] $1\033[0m"; }
 # 1. 编译 binutils for i686-elf
-echo "--- Step 1: binutils ---"
+log_info "--- Step 1: binutils ---"
 if [ ! -f binutils-2.36.tar.xz ]; then
     echo "下载 binutils..."
     wget -q https://mirrors.tuna.tsinghua.edu.cn/gnu/binutils/binutils-2.36.tar.xz
@@ -22,23 +23,23 @@ fi
 mkdir -p build-binutils
 cd build-binutils
 
-echo "Configuring..."
-../binutils-2.36/configure --target=i686-elf --prefix="$PREFIX" --disable-nls --disable-werror
+log_info "Configuring..."
+../binutils-2.36/configure --target=i686-linux-gnu --prefix="$PREFIX" --disable-nls --disable-werror
 if [ $? -ne 0 ]; then
     echo "Error: Configure failed!"
     exit 1
 fi
 
-echo "Building..."
+log_info "Building..."
 make -j$(nproc)
 if [ $? -ne 0 ]; then
     echo "Error: Build failed!"
     exit 1
 fi
 
-echo "Installing..."
+log_info "Installing..."
 make install
 
-echo "--- binutils 安装完成 ---"
-ls "$PREFIX/bin/i686-elf-"* 
+log_info "--- binutils 安装完成 ---"
+ls "$PREFIX/bin/i686-linux-gnu-"* 
 cd "$CROSS_DIR"

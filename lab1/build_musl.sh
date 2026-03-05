@@ -1,10 +1,9 @@
 #!/bin/bash
 # ============================================================================
-# Lab1 i386 完整验证脚本 - 麒麟操作系统 ARM64 → i386 交叉编译
+# 麒麟操作系统 arm64, x86_64 → i386 交叉编译
 #
 # 宿主: 麒麟 Linux Advanced Server V11 (aarch64)
 # 目标: i386 32位
-# 用法: bash verify_lab1_i386.sh [musl|1|2|3|4|5|6|7|8|all]
 # ============================================================================
 
 LAB1_DIR="$HOME/sysuos-2026-spring-i386/lab1"
@@ -12,7 +11,6 @@ CROSS_INSTALL="$LAB1_DIR/cross-tools/install"
 MUSL_INSTALL="$CROSS_INSTALL/i686-linux-musl"
 RESULTS_DIR="$LAB1_DIR/results_i386"
 KERNEL_DIR="$LAB1_DIR/linux-5.10.19"
-BUSYBOX_DIR="$LAB1_DIR/busybox-1.36.1"
 LINUX011_DIR="$LAB1_DIR/linux-0.11"
 
 export PATH="$CROSS_INSTALL/bin:$PATH"
@@ -79,16 +77,22 @@ build_musl() {
     fi
 
     # 创建 musl-gcc 包装脚本
-    cat > "$CROSS_INSTALL/bin/i686-linux-musl-gcc" << WEOF
+cat > "$CROSS_INSTALL/bin/i686-linux-musl-gcc" << 'EOF'
 #!/bin/sh
-exec i686-linux-gnu-gcc "\$@" -specs "$MUSL_INSTALL/lib/musl-gcc.specs"
-WEOF
-    chmod +x "$CROSS_INSTALL/bin/i686-linux-musl-gcc"
+REALPATH=$(dirname "$(readlink -f "$0")")
+MUSL_ROOT=$(dirname "$REALPATH")/i686-linux-musl
 
-    # 创建其他工具的符号链接
-    for tool in ar as ld nm objcopy objdump ranlib readelf strip; do
-        ln -sf "i686-linux-gnu-$tool" "$CROSS_INSTALL/bin/i686-linux-musl-$tool"
-    done
+exec "$REALPATH/i686-linux-gnu-gcc" "$@" -specs "$MUSL_ROOT/lib/musl-gcc.specs"
+EOF
+chmod +x "$CROSS_INSTALL/bin/i686-linux-musl-gcc"
+
+    # 修正后的符号链接（确保在目标目录执行）
+    (
+        cd "$CROSS_INSTALL/bin" || exit
+        for tool in ar as ld nm objcopy objdump ranlib readelf strip; do
+            ln -sf "i686-linux-gnu-$tool" "i686-linux-musl-$tool"
+        done
+    )
 
     if [ -f "$MUSL_INSTALL/lib/libc.a" ] && [ -f "$MUSL_INSTALL/lib/musl-gcc.specs" ]; then
         log_ok "musl-libc 构建成功"
@@ -110,13 +114,10 @@ main() {
     echo "  架构: $(uname -m) (宿主) → i386 (目标)"
     echo "============================================================================"
 
-    build_musl  2>&1 | tee "$RESULTS_DIR/step0_musl.log"
+    build_musl  
     echo ""
 
-    log_section "验证总结"
-    echo "所有结果保存在: $RESULTS_DIR/"
-    ls -lh "$RESULTS_DIR/"
-    echo ""
+    log_section "编译完成"
     echo "完成时间: $(date)"
 }
 
