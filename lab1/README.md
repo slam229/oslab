@@ -322,7 +322,7 @@ gcc -o helloworld -m32 -static helloworld.c
 >
 > 编译完成后，可以使用`file helloworld`命令验证，输出应包含`ELF 32-bit`和`statically linked`。
 >
-> **麒麟OS用户提示：** 在x86_64麒麟OS上编译32位程序需要安装：`sudo yum install glibc-devel.i686 libgcc.i686`（参见第一部分）。ARM64用户请去掉`-m32`参数，直接编译为64位程序（详见附录G.2）。
+> **麒麟OS用户提示：** 在x86_64麒麟OS上编译32位程序需要自行编译并使用`i686-linux-musl-gcc`。ARM64用户请去掉`-m32`参数，直接编译为64位程序（详见附录G.2）。
 
 ## 加载initramfs
 
