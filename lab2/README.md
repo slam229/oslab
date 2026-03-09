@@ -41,147 +41,6 @@ sudo yum install nasm qemu-system-x86_64 gdb make
 > - 在某些麒麟OS版本中，可能没有 `qemu-system-i386` 命令，可以使用 `qemu-system-x86_64` 代替，`qemu-system-x86_64` 完全兼容16位实模式代码。
 > - 验证安装：`nasm --version`、`qemu-system-i386 --version`（或 `qemu-system-x86_64 --version`）、`gdb --version`。
 
-## 快速运行与观察 Lab2 输出
-
-为了方便课堂演示与远程教学，`lab2` 目录中已经提供了统一脚本 `demo_lab2.sh`。它同时支持：
-
-- **本机直接运行**：在当前机器直接启动 QEMU 窗口。
-- **麒麟虚拟机中运行，Mac 上观察**：通过 SSH 启动虚拟机中的 QEMU，并在 Mac 上通过 VNC 或 SPICE 查看画面。
-
-### 为什么需要这样做
-
-在实际教学环境中，**运行程序的机器**和**观察程序输出、输入程序的机器**往往不是同一台：
-
-- QEMU 可能运行在麒麟虚拟机中；
-- 教师或学生真正看到图形窗口的设备却是本地 Mac；
-- 问题并不是“麒麟 OS 不支持图形界面”，而是**当前实验环境中的 QEMU 窗口无法直接显示在本地，也无法直接接收本地键盘输入**；
-- 因此，除了“启动程序”以外，还需要一种办法把**远端虚拟机里的显示输出和键盘输入**与本地连接起来。
-
-这也是这里同时提供“本机直接运行”和“远程运行、本地观察”两种模式的原因。
-
-另外，统一脚本在远端启动前会自动同步源码并重新编译，其目的是避免以下常见问题：
-
-- 虚拟机中保留的是旧版 `snake.img` 或旧版脚本；
-- 本地已经修改了源码，但远端还在运行旧程序；
-- 结果表现为“能够连上窗口，但不是当前版本的程序”或者“画面黑屏”。
-
-### 为什么需要 VNC 或 SPICE
-
-当 QEMU 跑在远端虚拟机中时，QEMU 创建出来的图形窗口默认只存在于远端桌面环境里，或者当前的启动方式本身就是面向无本地图形窗口的；因此，本地 Mac 并不能直接看到这个窗口，同时本地键盘输入也不能自然地送到这个远端窗口中。
-
-这对于 `snake` 这样的交互程序尤其明显：如果只是“在远端执行了 qemu 命令”，但本地没有接管这个图形窗口，那么你既看不到贪吃蛇画面，也无法把方向键或 `W/A/S/D` 输入送给程序。
-
-因此需要借助图形转发协议，把**显示输出**带回本地，同时把**本地键盘输入**传递给远端 QEMU 窗口。
-
-- **VNC**：通用、兼容性好，macOS 自带客户端即可连接，适合课堂演示和快速查看。
-- **SPICE**：也是 QEMU 常用的远程显示协议，图形交互体验通常更好，适合需要专门客户端的场景。
-
-可以把它们简单理解为：
-
-- `QEMU` 负责在虚拟机里运行程序；
-- `VNC` / `SPICE` 负责把虚拟机里的图形窗口“送到”你的本地电脑上显示，并把本地输入转发给这个窗口。
-
-### 1. 本机直接运行
-
-如果当前机器本身有图形界面，最简单的方式是直接在 `lab2` 目录执行：
-
-```shell
-cd lab2
-bash demo_lab2.sh run-snake
-```
-
-上面的命令会直接打开 QEMU 图形窗口，并运行贪吃蛇程序。
-
-如果只想运行某个单独的实验镜像，也可以使用：
-
-```shell
-cd lab2
-bash demo_lab2.sh compile a1_helloworld
-bash demo_lab2.sh run a1_helloworld
-```
-
-### 2. 麒麟虚拟机中运行，Mac 上通过 VNC 观察
-
-如果 QEMU 跑在麒麟虚拟机中，而你的图形界面在 Mac 本机，推荐使用：
-
-```shell
-cd lab2
-bash demo_lab2.sh remote-vnc-snake
-```
-
-这个命令会自动完成以下步骤：
-
-1. 将当前工作区中的 `demo_lab2.sh`、`mbr_snake.asm`、`snake.asm` 同步到麒麟虚拟机。
-2. 在虚拟机中重新编译并启动贪吃蛇程序。
-3. 自动解析远端 VNC 端口。
-4. 在 Mac 本机启动 TCP 中继并打开 VNC 客户端。
-
-如需停止远端 QEMU 与本地中继：
-
-```shell
-bash demo_lab2.sh remote-stop
-```
-
-如果要查看其他程序，可把 `snake` 换成对应名字，例如：
-
-```shell
-bash demo_lab2.sh remote-vnc a1_helloworld
-```
-
-### 3. 麒麟虚拟机中运行，Mac 上通过 SPICE 观察
-
-如果希望使用 SPICE 查看远端 QEMU 图形窗口，可执行：
-
-```shell
-cd lab2
-bash demo_lab2.sh remote-spice-snake
-```
-
-首次使用前，Mac 本机需要安装 SPICE 客户端。推荐：
-
-```shell
-brew install spice-gtk
-```
-
-安装完成后可使用 `spicy` 连接；脚本会自动启动本地中继并拉起客户端。
-
-如果只想手动连接本地中继，也可以使用类似下面的命令：
-
-```shell
-spicy -h 127.0.0.1 -p 5931
-```
-
-### 4. 如何确认已经看到了 Lab2 的输出
-
-不同程序的“正确输出”表现形式不同，常见现象如下：
-
-- `a1_helloworld`：屏幕第一行出现 `Hello World`。
-- `a1_studentid`：屏幕上出现学号字符串。
-- `a2_cursor` / `a2_int10h` / `a2_keyboard`：能看到光标、字符输出或键盘交互效果。
-- `snake`：会看到彩色边框、蛇身、食物，连接成功后可通过方向键或 `W/A/S/D` 控制。
-
-如果窗口能够打开，但画面是黑屏或没有进入预期程序，优先检查以下几点：
-
-1. 是否使用了 `demo_lab2.sh` 提供的启动方式，而不是手工启动旧镜像。
-2. 是否先重新编译了对应程序（`compile`、`compile-all` 或 `run-snake` / `remote-vnc-snake` / `remote-spice-snake`）。
-3. 远端运行时，是否让脚本自动同步了本地最新源码到麒麟虚拟机。
-
-### 5. 常用命令速查
-
-```shell
-# 本机直接运行贪吃蛇
-bash demo_lab2.sh run-snake
-
-# 远端麒麟虚拟机运行，Mac 上用 VNC 看贪吃蛇
-bash demo_lab2.sh remote-vnc-snake
-
-# 远端麒麟虚拟机运行，Mac 上用 SPICE 看贪吃蛇
-bash demo_lab2.sh remote-spice-snake
-
-# 停止远端 QEMU 与本地中继
-bash demo_lab2.sh remote-stop
-```
-
 # IA-32处理器
 
 ## 一切从汇编开始
@@ -994,6 +853,15 @@ qemu-system-i386 -hda hd.img -serial null -parallel stdio
 启动后的效果如下。可以看到第一行已经输出“Hello World”。
 
 <img src="gallery/运行结果.png" alt="运行结果" style="zoom:80%;" />
+
+如果你用的是麒麟OS，那么你可能看到的不是上面的Helloworld，而是下面的qemu运行日志：
+<img src="gallery/qemu-no-output.png" alt="没有看到helloworld" style="zoom:60%;" />
+这个日志显示，qemu已经成功运行，并且 VNC 服务已经在本地的 5900 端口开启。接下来，你需要运行`sudo yum install tigervnc`。等安装完毕后，运行如下指令
+
+> vncviewer localhost:5900
+
+即可在弹出的VNC窗口中看到程序输出:
+<img src="gallery/use-tigervnc.png" alt="vncviewer的输出" style="zoom:60%;" />
 
 至此，我们的工作已经完成了。
 现在，可以打开[Assignment说明](assignment.md)来完成实验任务。
