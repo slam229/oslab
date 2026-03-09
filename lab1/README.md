@@ -126,6 +126,8 @@ sudo apt install flex
 sudo apt install libssl-dev
 sudo apt install libc6-dev-i386
 ```
+注意，如果你发现执行完上面的下载指令后，你的ubuntu上并没有出现 `qemu-system-i386`，那么请运行
+> sudo apt install qemu-system-x86
 
 **麒麟OS：**
 
@@ -441,7 +443,9 @@ qemu-system-i386 -kernel linux-5.10.19/arch/x86/boot/bzImage -initrd initramfs-b
 退出QEMU：按`Ctrl+A`然后按`X`。
 
 **思考题：**
-> 1. 尝试在`start_kernel`中单步执行几步（`n`），观察内核初始化的前几个函数调用。
+> 1.尝试在`start_kernel`中单步执行几步（`n`），观察内核初始化的前几个函数调用。
+
+>你可能会发现，即使你在`start_kernel`处打了断点，按`c`后，也仍然没有在断点处停止。对此， 你可以修改qemu启动时的`append`参数: ` -append "console=ttyS0"` 改成 ` -append "nokaslr console=ttyS0"`。
 
 # 第六部分：完成Linux 0.11内核的编译、启动和调试
 
